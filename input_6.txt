@@ -1,0 +1,7 @@
+#Advanced
+8000
+26:30
+50
+Track
+Aerobic-Anarobic: 3
+Include Jog Rest

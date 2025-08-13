@@ -7,49 +7,8 @@
 #include <cmath>
 #include <random>
 #include <getopt.h>
+#include "work.hpp"
 using namespace std;
-
-enum class Type : int {
-    Track,
-    Road,
-    Treadmill
-};
-
-class Program {
-public:
-    void get_options(int argc, char **argv);
-
-    void read_data();
-
-    void run();
-
-private:
-    bool isBasic = false;
-
-    bool isTest = false;
-
-    bool isPace = false;
-
-    bool policy = false;
-
-    bool isDistance = false;
-
-    int distance;
-
-    int time;
-
-    Type type;
-
-    int load;
-
-    double five = 0.0;
-
-    int warmUp = 0;
-
-    int coolDown = 0;
-
-    int workoutMilage = 0;
-};
 
 // Print help for the user when requested.
 // argv[0] is the name of the currently executing program
@@ -73,6 +32,7 @@ void Program::get_options(int argc, char **argv) {
     struct option longOpts[] = {
         {  "help", no_argument, nullptr,  'h' },
         { "basic", no_argument, nullptr,  'b' },
+        { "advanced", no_argument, nullptr, 'a' },
         { "test", no_argument, nullptr, 't' },
         { "pace", no_argument, nullptr, 'p' },
         { "distance", no_argument, nullptr, 'd'},
@@ -82,7 +42,7 @@ void Program::get_options(int argc, char **argv) {
 
     bool opts_provided = false;
     // Fill in the double quotes, to match the mode and help options.
-    while ((option = getopt_long(argc, argv, "hbtpd", longOpts, &option_index)) != -1) {
+    while ((option = getopt_long(argc, argv, "hbatpd", longOpts, &option_index)) != -1) {
         opts_provided = true;
         switch (option) {
         case 'h':
@@ -92,6 +52,11 @@ void Program::get_options(int argc, char **argv) {
 
         case 'b':
             isBasic = true;
+            policy = true;
+            break;
+
+        case 'a':
+            isAdvanced = true;
             policy = true;
             break;
 
@@ -141,52 +106,55 @@ void Program::read_data() {
     string line;
     char junk;
     getline(cin, line);
-    cin >> distance;
-    cin >> time;
-    time *= 60;
+    cin >> athlete.distance;
+    cin >> athlete.time;
+    athlete.time *= 60;
     cin >> junk;
     int temp;
     cin >> temp;
-    time += temp;
-    cin >> load;
+    athlete.time += temp;
+    cin >> athlete.load;
     string a;
     cin >> a;
     if (a == "Track") {
-        type = Type::Track;
+        athlete.type = Type::Track;
     }
     else if (a == "Road") {
-        type = Type::Road;
+        athlete.type = Type::Road;
+    }
+    else if (a == "Treadmill") {
+        athlete.type = Type::Treadmill;
     }
     else {
-        type = Type::Treadmill;
+        throw std::runtime_error("Invalid Option");
     }
 }
 
 void Program::run() {
 
-    double num = generate(distance);
-    int a = time;
-    int b = distance;
+    double num = generate(athlete.distance);
+    int a = athlete.time;
+    int b = athlete.distance;
     int pace = static_cast<int>(floor(static_cast<double>(a) * 1600.0 / static_cast<double>(b)));
-    five = static_cast<double>(pace) / num;
+    athlete.five = static_cast<double>(pace) / num;
 
     if (isPace) {
         double milenum = generate(1600);
-        double mile = static_cast<double>(five) * milenum;
+        double mile = static_cast<double>(athlete.five) * milenum;
         cout << "Projected Mile Pace/Time: " << (static_cast<int>(mile) / 60) << ":";
         if (static_cast<int>(mile) % 60 < 10) {
             cout << "0";
         }
         cout << (static_cast<int>(mile) % 60) << endl;
 
-        cout << "Projected 5k Pace: " << (static_cast<int>(five) / 60) << ":";
-        if (static_cast<int>(five) % 60 < 10) {
+        cout << "Projected 5k Pace: " << (static_cast<int>(athlete.five) / 60) << ":";
+        if (static_cast<int>(athlete.five) % 60 < 10) {
             cout << "0";
         }
-        cout << (static_cast<int>(five) % 60) << endl;
+        cout << (static_cast<int>(athlete.five) % 60) << endl;
 
         double eightnum = generate(8000);
-        double eight = static_cast<double>(five) * eightnum;
+        double eight = static_cast<double>(athlete.five) * eightnum;
         cout << "Projected 8K/Threshold Pace: " << (static_cast<int>(eight) / 60) << ":";
         if (static_cast<int>(eight) % 60 < 10) {
             cout << "0";
@@ -194,7 +162,7 @@ void Program::run() {
         cout << (static_cast<int>(eight) % 60) << endl;
 
         double temponum = generate(16000);
-        double tempo = static_cast<double>(five) * temponum;
+        double tempo = static_cast<double>(athlete.five) * temponum;
         cout << "Projected Tempo Pace: " << (static_cast<int>(tempo) / 60) << ":";
         if (static_cast<int>(tempo) % 60 < 10) {
             cout << "0";
@@ -202,7 +170,7 @@ void Program::run() {
         cout << (static_cast<int>(tempo) % 60) << endl;
 
         double maranum = generate(42195);
-        double marathon = static_cast<double>(five) * maranum;
+        double marathon = static_cast<double>(athlete.five) * maranum;
         cout << "Projected Marathon Pace: " << (static_cast<int>(marathon) / 60) << ":";
         if (static_cast<int>(marathon) % 60 < 10) {
             cout << "0";
@@ -210,7 +178,7 @@ void Program::run() {
         cout << (static_cast<int>(marathon) % 60) << endl;
     }
 
-    double totalMilage = load;
+    double totalMilage = athlete.load;
 
     if (totalMilage <= 25) {
         totalMilage = 5;
@@ -220,11 +188,11 @@ void Program::run() {
     }
     int criticalMilage;
 
-    if (distance <= 3200) {
+    if (athlete.distance <= 3200) {
         criticalMilage = 2;
     }
-    else if (3200 < distance && distance < 10000) {
-        criticalMilage = distance / 1600;
+    else if (3200 < athlete.distance && athlete.distance < 10000) {
+        criticalMilage = athlete.distance / 1600;
     }
     else {
         criticalMilage = 7;
@@ -234,11 +202,11 @@ void Program::run() {
     int temp = static_cast<int>(totalMilage);
     temp -= 2;
     easyMilage += 2;
-    workoutMilage += 2;
+    athlete.workoutMilage += 2;
     temp -= 2;
 
     if (criticalMilage > 2) {
-        workoutMilage++;
+        athlete.workoutMilage++;
         temp--;
     }
     else {
@@ -246,8 +214,8 @@ void Program::run() {
         temp--;
     }
 
-    while (temp != 0 && workoutMilage < criticalMilage) {
-        workoutMilage++;
+    while (temp != 0 && athlete.workoutMilage < criticalMilage) {
+        athlete.workoutMilage++;
         temp--;
         if (temp != 0) {
             easyMilage++;
@@ -256,7 +224,7 @@ void Program::run() {
     }
 
     while (temp != 0) {
-        workoutMilage++;
+        athlete.workoutMilage++;
         temp--;
         if (temp != 0) {
             easyMilage++;
@@ -269,95 +237,95 @@ void Program::run() {
     }
 
     if (easyMilage % 2 == 1) {
-        warmUp = easyMilage / 2 + 1;
+        athlete.warmUp = easyMilage / 2 + 1;
     }
     else {
-        warmUp = easyMilage / 2;
+        athlete.warmUp = easyMilage / 2;
     }
-    coolDown = easyMilage / 2;
+    athlete.coolDown = easyMilage / 2;
 
     if (isDistance) {
         cout << "Total Milage: " << totalMilage << endl;
-        cout << "Warm Up: " << warmUp << endl;
-        cout << "Workout Miles: " << workoutMilage << endl;
-        cout << "Cooldown: " << coolDown << endl;
+        cout << "Warm Up: " << athlete.warmUp << endl;
+        cout << "Workout Miles: " << athlete.workoutMilage << endl;
+        cout << "Cooldown: " << athlete.coolDown << endl;
     }
 
     if (isBasic) {
         int value = get_random();
-        if (type == Type::Track) {
+        if (athlete.type == Type::Track) {
             if (value <= 2) {
                 cout << "Mile Repeats" << endl;
-                cout << "Start with " << warmUp << " easy miles." << endl;
+                cout << "Start with " << athlete.warmUp << " easy miles." << endl;
                 double threshnum = generate(8000);
-                double thresh = static_cast<double>(five) * threshnum;
-                if (workoutMilage > 5) {
-                    cout << "Run " << (workoutMilage - 1) << " 1600 meter reps at ";
+                double thresh = static_cast<double>(athlete.five) * threshnum;
+                if (athlete.workoutMilage > 5) {
+                    cout << "Run " << (athlete.workoutMilage - 1) << " 1600 meter reps at ";
                 } 
                 else {
-                    cout << "Run " << workoutMilage << " 1600 meter reps at ";
+                    cout << "Run " << athlete.workoutMilage << " 1600 meter reps at ";
                 }
                 cout << (static_cast<int>(thresh) / 60) << ":";
                 if (static_cast<int>(thresh) % 60 < 10) {
                     cout << "0";
                 }
                 cout << (static_cast<int>(thresh) % 60);
-                if (workoutMilage > 5) {
+                if (athlete.workoutMilage > 5) {
                     cout << " with 400 jog between each rep." << endl;
                 }
                 else {
                     cout << " with 4:00 standing rest between each rep." << endl;
                 }
-                cout << "Finish with " << coolDown << " easy miles." << endl;
+                cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
             }
             else if (value <= 3) {
                 cout << "800 Repeats" << endl;
-                cout << "Start with " << warmUp << " easy miles." << endl;
-                cout << "Run " << (workoutMilage * 2) << " 800 meter reps at ";
-                double val = five / 2;
+                cout << "Start with " << athlete.warmUp << " easy miles." << endl;
+                cout << "Run " << (athlete.workoutMilage * 2) << " 800 meter reps at ";
+                double val = athlete.five / 2;
                 cout << (static_cast<int>(val) / 60) << ":";
                 if (static_cast<int>(val) % 60 < 10) {
                     cout << "0";
                 }
                 cout << (static_cast<int>(val) % 60);
                 cout << " with 3:00 standing rest between each rep." << endl;
-                cout << "Finish with " << coolDown << " easy miles." << endl;
+                cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
             }
             else if (value <= 4) {
                 cout << "1K Repeats" << endl;
-                cout << "Start with " << warmUp << " easy miles." << endl;
-                cout << "Run " << floor(workoutMilage * 1.6) << " 1000 meter reps at ";
-                double val = five * (0.625);
+                cout << "Start with " << athlete.warmUp << " easy miles." << endl;
+                cout << "Run " << floor(athlete.workoutMilage * 1.6) << " 1000 meter reps at ";
+                double val = athlete.five * (0.625);
                 cout << (static_cast<int>(val) / 60) << ":";
                 if (static_cast<int>(val) % 60 < 10) {
                     cout << "0";
                 }
                 cout << (static_cast<int>(val) % 60);
                 cout << " with 3:30 standing rest between each rep." << endl;
-                cout << "Finish with " << coolDown << " easy miles." << endl;
+                cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
             }
             else {
                 double temponum = generate(16000);
-                double tempo = static_cast<double>(five) * temponum;
+                double tempo = static_cast<double>(athlete.five) * temponum;
 
-                if (workoutMilage < 5) {
+                if (athlete.workoutMilage < 5) {
                     cout << "Track Tempo";
-                    cout << "Start with " << warmUp << " easy miles." << endl;
-                    cout << " Run " << workoutMilage << " miles, or " << (workoutMilage * 1600) << " meters at ";
+                    cout << "Start with " << athlete.warmUp << " easy miles." << endl;
+                    cout << " Run " << athlete.workoutMilage << " miles, or " << (athlete.workoutMilage * 1600) << " meters at ";
                     cout << (static_cast<int>(tempo) / 60) << ":";
                     if (static_cast<int>(tempo) % 60 < 10) {
                         cout << "0";
                     }
                     cout << (static_cast<int>(tempo) % 60);
                     cout << " pace." << endl;
-                    cout << "Finish with " << coolDown << " easy miles." << endl;
+                    cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
                 }
                 else {
                     cout << "The Michigan" << endl;
-                    cout << "Start with " << (warmUp - 1) << " easy miles." << endl;
+                    cout << "Start with " << (athlete.warmUp - 1) << " easy miles." << endl;
                     cout << "Run 1600 meters at ";
                     double threshnum = generate(8000);
-                    double thresh = static_cast<double>(five) * threshnum;
+                    double thresh = static_cast<double>(athlete.five) * threshnum;
                     cout << (static_cast<int>(thresh) / 60) << ":";
                     if (static_cast<int>(thresh) % 60 < 10) {
                         cout << "0";
@@ -372,7 +340,7 @@ void Program::run() {
                     cout << (static_cast<int>(tempo) % 60);
                     cout << " pace." << endl;
                     cout << "Run 1200 meters at ";
-                    double fem = five * 0.75;
+                    double fem = athlete.five * 0.75;
                     cout << (static_cast<int>(fem) / 60) << ":";
                     if (static_cast<int>(fem) % 60 < 10) {
                         cout << "0";
@@ -388,7 +356,7 @@ void Program::run() {
                     cout << " pace." << endl;
                     cout << "Run 800 meters at ";
                     double twonum = generate(3200);
-                    double two = static_cast<double>(five) * twonum;
+                    double two = static_cast<double>(athlete.five) * twonum;
                     two /= 2;
                     cout << (static_cast<int>(two) / 60) << ":";
                     if (static_cast<int>(two) % 60 < 10) {
@@ -404,22 +372,22 @@ void Program::run() {
                     cout << (static_cast<int>(tempo) % 60);
                     cout << " pace." << endl;
                     cout << "Run an ALL OUT 400" << endl;
-                    cout << "Finish with " << (coolDown - 1) << " easy miles." << endl;
+                    cout << "Finish with " << (athlete.coolDown - 1) << " easy miles." << endl;
                 }
             }
         }
-        else if (type == Type::Road) {
-            if (value < 4 || workoutMilage < 3) {
+        else if (athlete.type == Type::Road) {
+            if (value < 4 || athlete.workoutMilage < 3) {
                 bool doTempo = true;
-                if (workoutMilage > 6) {
+                if (athlete.workoutMilage > 6) {
                     doTempo = false;
                 }
                 cout << "Road Tempo" << endl;
-                cout << "Start with " << warmUp << " easy miles." << endl;
-                cout << "Run " << workoutMilage << " miles at ";
+                cout << "Start with " << athlete.warmUp << " easy miles." << endl;
+                cout << "Run " << athlete.workoutMilage << " miles at ";
                 if (doTempo) {
                     double temponum = generate(16000);
-                    double tempo = static_cast<double>(five) * temponum;
+                    double tempo = static_cast<double>(athlete.five) * temponum;
                     cout << (static_cast<int>(tempo) / 60) << ":";
                     if (static_cast<int>(tempo) % 60 < 10) {
                         cout << "0";
@@ -428,7 +396,7 @@ void Program::run() {
                 }
                 else {
                     double maranum = generate(42195);
-                    double marathon = static_cast<double>(five) * maranum;
+                    double marathon = static_cast<double>(athlete.five) * maranum;
                     cout << (static_cast<int>(marathon) / 60) << ":";
                     if (static_cast<int>(marathon) % 60 < 10) {
                         cout << "0";
@@ -436,68 +404,72 @@ void Program::run() {
                     cout << (static_cast<int>(marathon) % 60);
                 }
                 cout << " pace." << endl;
-                cout << "Finish with " << coolDown << " easy miles." << endl;
+                cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
             }
             else {
                 cout << "Road Fartlek" << endl;
-                cout << "Start with " << warmUp << " easy miles." << endl;
-                cout << "For " << workoutMilage << " miles, rotate between running 0.25 miles at ";
+                cout << "Start with " << athlete.warmUp << " easy miles." << endl;
+                cout << "For " << athlete.workoutMilage << " miles, rotate between running 0.25 miles at ";
                 double threshnum = generate(8000);
-                double thresh = static_cast<double>(five) * threshnum;
+                double thresh = static_cast<double>(athlete.five) * threshnum;
                 cout << (static_cast<int>(thresh) / 60) << ":";
                 if (static_cast<int>(thresh) % 60 < 10) {
                     cout << "0";
                 }
                 cout << (static_cast<int>(thresh) % 60);
                 cout << " and running 0.25 miles at an easier pace." << endl;
-                cout << "Finish with " << coolDown << " easy miles." << endl;
+                cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
             }
         }
         else {
             if (value < 4) {
                 cout << "Treadmill Mile Repeats" << endl;
-                cout << "Start with " << warmUp << " easy miles." << endl;
+                cout << "Start with " << athlete.warmUp << " easy miles." << endl;
                 double threshnum = generate(8000);
-                double thresh = static_cast<double>(five) * threshnum;
+                double thresh = static_cast<double>(athlete.five) * threshnum;
                 thresh = 3600 / thresh;
                 thresh = round(thresh * 10.0) / 10.0;
-                if (workoutMilage > 5) {
-                    cout << "Run " << (workoutMilage - 1) << " 1 mile reps at ";
+                if (athlete.workoutMilage > 5) {
+                    cout << "Run " << (athlete.workoutMilage - 1) << " 1 mile reps at ";
                 } 
                 else {
-                    cout << "Run " << workoutMilage << " 1 mile reps at ";
+                    cout << "Run " << athlete.workoutMilage << " 1 mile reps at ";
                 }
                 cout << thresh << " mph";
-                if (workoutMilage > 5) {
+                if (athlete.workoutMilage > 5) {
                     cout << " with 0.25 mile jog between each rep." << endl;
                 }
                 else {
                     cout << " with 4:00 standing rest between each rep." << endl;
                 }
-                cout << "Finish with " << coolDown << " easy miles." << endl;
+                cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
             }
             else {
                 cout << "Treadmill Tempo" << endl;
-                cout << "Start with " << warmUp << " easy miles." << endl;
-                cout << "Run " << workoutMilage << " miles at ";
+                cout << "Start with " << athlete.warmUp << " easy miles." << endl;
+                cout << "Run " << athlete.workoutMilage << " miles at ";
                 double temponum = generate(16000);
-                double tempo = static_cast<double>(five) * temponum;
+                double tempo = static_cast<double>(athlete.five) * temponum;
                 tempo = 3600 / tempo;
                 tempo = round(tempo * 10.0) / 10.0;
                 cout << tempo << " mph." << endl;
-                cout << "Finish with " << coolDown << " easy miles." << endl;
+                cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
             }
         }
     }
 
+    if (isAdvanced) {
+        cout << "Under Construction" << endl;
+    }
+
     if (isTest) {
-        cout << distance << endl;
-        cout << time << endl;
-        cout << load << endl;
-        if (type == Type::Track) {
+        cout << athlete.distance << endl;
+        cout << athlete.time << endl;
+        cout << athlete.load << endl;
+        if (athlete.type == Type::Track) {
             cout << "Track";
         }
-        else if (type == Type::Road) {
+        else if (athlete.type == Type::Road) {
             cout << "Road";
         }
         else {
