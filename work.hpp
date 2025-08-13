@@ -24,7 +24,7 @@ struct Runner {
 
     int load;
 
-    bool jog = true;
+    bool jog = false;
 
     int scale = -1;
 

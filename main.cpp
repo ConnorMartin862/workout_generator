@@ -128,6 +128,26 @@ void Program::read_data() {
     else {
         throw std::runtime_error("Invalid Option");
     }
+
+    if (isAdvanced) {
+        string junk;
+        cin >> junk;
+
+        int z;
+        cin >> z;
+        athlete.scale = z;
+        char y;
+        cin >> y;
+        if (y == 'I') {
+            athlete.jog = true;
+        }
+        else if (y == 'D') {
+            athlete.jog = false;
+        }
+        else {
+            throw std::runtime_error("Invalid Option");
+        }
+    }
 }
 
 void Program::run() {
@@ -474,6 +494,18 @@ void Program::run() {
         }
         else {
             cout << "Treadmill";
+        }
+        cout << endl;
+        
+        if (isAdvanced) {
+            cout << athlete.scale << endl;
+            if (athlete.jog) {
+                cout << "Jog";
+            }
+            else {
+                cout << "Stand";
+            }
+            cout << endl;
         }
     }
 }
