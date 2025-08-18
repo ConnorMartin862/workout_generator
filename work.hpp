@@ -45,6 +45,8 @@ public:
 
     void run();
 
+    void print(int value);
+
 private:
     bool isBasic = false;
 
