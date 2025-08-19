@@ -3,5 +3,5 @@
 26:30
 50
 Track
-Aerobic-Anarobic: 4
+Aerobic-Anarobic: 1
 Include Jog Rest

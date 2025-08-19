@@ -152,7 +152,79 @@ void Program::read_data() {
 
 void Program::print(int value) {
     if (athlete.type == Type::Track) {
-        if (value <= 2) {
+        if (value <= 1) {
+            double warm;
+            double cool;
+            double p;
+            if (isAdvanced && athlete.jog) {
+                if (athlete.workoutMilage > 3) {
+                    p = athlete.workoutMilage - 3.5;
+                    warm = athlete.warmUp - 1 + (p / 2);
+                    cool = athlete.coolDown - 1.25 + (p / 2);
+                }
+                else {
+                    p = athlete.workoutMilage - 1.75;
+                    warm = athlete.warmUp - 0.5 + (p / 2);
+                    cool = athlete.coolDown - 0.5 + (p / 2);
+                }
+            }
+            else {
+                if (athlete.workoutMilage > 3) {
+                    p = athlete.workoutMilage - 3.5;
+                }
+                else {
+                    p = athlete.workoutMilage - 1.75;
+                }
+                warm = athlete.warmUp + (p / 2);
+                cool = athlete.coolDown + (p / 2);
+            }
+            double twonum = generate(3200);
+            double two = static_cast<double>(athlete.five) * twonum;
+            double threefournum = generate(2400);
+            double threefour = static_cast<double>(athlete.five) * threefournum;
+            double onenum = generate(1600);
+            double one = static_cast<double>(athlete.five) * onenum;
+
+            cout << "Anerobic Ladder" << endl;
+            cout << "Start with " << warm << " easy miles." << endl;
+            if (athlete.workoutMilage > 3) {
+                cout << "Run a 2 400s, 2 600s, 2 800s, 2 600s, 2 400s ";
+            }
+            else {
+                cout << "Run a 400, 600, 800, 600, 400  ";
+            }
+
+            cout << "with the 400s at ";
+            cout << (static_cast<int>(one) / 60) << ":";
+            if (static_cast<int>(one) % 60 < 10) {
+                cout << "0";
+            }
+            cout << (static_cast<int>(one) % 60);
+
+            cout << " pace, the 600s at ";
+            cout << (static_cast<int>(threefour) / 60) << ":";
+            if (static_cast<int>(threefour) % 60 < 10) {
+                cout << "0";
+            }
+            cout << (static_cast<int>(threefour) % 60);
+
+            cout << " pace, and the 800s at ";
+            cout << (static_cast<int>(two) / 60) << ":";
+            if (static_cast<int>(two) % 60 < 10) {
+                cout << "0";
+            }
+            cout << (static_cast<int>(two) % 60);
+            cout << " pace." << endl;
+
+            if (isAdvanced && athlete.jog) {
+                cout << "Take a 400 meter jog between each rep." << endl;
+            }
+            else {
+                cout << "Take 2:00 standing rest between each rep" << endl;
+            }
+            cout << "Finish with " << cool << " easy miles." << endl;
+        }
+        else if (value <= 2) {
             double warm;
             double cool;
             if (isAdvanced && athlete.jog) {
@@ -380,8 +452,26 @@ void Program::print(int value) {
     }
     else {
         if (value < 4) {
+            double warm;
+            double cool;
+            if (isAdvanced && athlete.jog) {
+                double jogDist = athlete.workoutMilage - 1;
+                if (static_cast<int>(jogDist) % 2 == 0) {
+                    warm = athlete.warmUp - (jogDist / 8);
+                    cool = athlete.coolDown - (jogDist / 8);
+                }
+                else {
+                    warm = athlete.warmUp - ((jogDist - 1) / 8);
+                    cool = athlete.coolDown - ((jogDist + 1) / 8);
+                }
+            }
+            else {
+                warm = athlete.warmUp;
+                cool = athlete.coolDown;
+            }
+
             cout << "Treadmill Mile Repeats" << endl;
-            cout << "Start with " << athlete.warmUp << " easy miles." << endl;
+            cout << "Start with " << warm << " easy miles." << endl;
             double threshnum = generate(8000);
             double thresh = static_cast<double>(athlete.five) * threshnum;
             thresh = 3600 / thresh;
@@ -393,13 +483,13 @@ void Program::print(int value) {
                 cout << "Run " << athlete.workoutMilage << " 1 mile reps at ";
             }
             cout << thresh << " mph";
-            if (athlete.workoutMilage > 5) {
+            if (isAdvanced && athlete.jog) {
                 cout << " with 0.25 mile jog between each rep." << endl;
             }
             else {
                 cout << " with 4:00 standing rest between each rep." << endl;
             }
-            cout << "Finish with " << athlete.coolDown << " easy miles." << endl;
+            cout << "Finish with " << cool << " easy miles." << endl;
         }
         else {
             cout << "Treadmill Tempo" << endl;
