@@ -180,12 +180,15 @@ void Program::print(int value) {
             }
             double twonum = generate(3200);
             double two = static_cast<double>(athlete.five) * twonum;
+            two /= 2;
             double threefournum = generate(2400);
             double threefour = static_cast<double>(athlete.five) * threefournum;
+            threefour /= 2.67;
             double onenum = generate(1600);
             double one = static_cast<double>(athlete.five) * onenum;
+            one /= 4;
 
-            cout << "Anerobic Ladder" << endl;
+            cout << "Anaerobic Ladder" << endl;
             cout << "Start with " << warm << " easy miles." << endl;
             if (athlete.workoutMilage > 3) {
                 cout << "Run a 2 400s, 2 600s, 2 800s, 2 600s, 2 400s ";
@@ -201,20 +204,20 @@ void Program::print(int value) {
             }
             cout << (static_cast<int>(one) % 60);
 
-            cout << " pace, the 600s at ";
+            cout << " , the 600s at ";
             cout << (static_cast<int>(threefour) / 60) << ":";
             if (static_cast<int>(threefour) % 60 < 10) {
                 cout << "0";
             }
             cout << (static_cast<int>(threefour) % 60);
 
-            cout << " pace, and the 800s at ";
+            cout << " , and the 800s at ";
             cout << (static_cast<int>(two) / 60) << ":";
             if (static_cast<int>(two) % 60 < 10) {
                 cout << "0";
             }
             cout << (static_cast<int>(two) % 60);
-            cout << " pace." << endl;
+            cout << " ." << endl;
 
             if (isAdvanced && athlete.jog) {
                 cout << "Take a 400 meter jog between each rep." << endl;
